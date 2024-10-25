@@ -70,11 +70,37 @@ main .intro p {
   height: 100px;
 }/*# sourceMappingURL=main.css.map */
 
-.reset-button{
-  background: rgba(177, 199, 210, 0.6117647059);
+.button-wrapper{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 15px;
+}
+
+.stop-button{
+  background: rgba(234,153,153,255);
   border-color: #25414f;
-  width: 10%;
+  width: auto;
   padding: 7px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.stop-button:hover{
+  background: rgba(255, 0, 0, 0.6);
+  font-weight: bold;
+}
+
+.reset-button{
+  background: rgba(177, 199, 210, 0.6117647059);
+  border-color: #25414f;
+  width: auto;
+  padding: 7px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-button:hover{
+  background: rgba(177, 199, 210, 2);
+  font-weight: bold;
 }

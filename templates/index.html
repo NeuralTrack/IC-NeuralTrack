@@ -43,81 +43,20 @@
                 </div>
             </div>
         </section>
+        
+        <!-- Botão para resetar e parar a captura -->
+        <div class="button-wrapper">
+            <form action="/reset" method="get">
+                <button class="reset-button" type="submit">Resetar Amostragem</button>
+            </form>
+            <form action="/stop" method="get">
+                <button class="stop-button" type="submit">Parar Amostragem</button>
+            </form>
+        </div>
 
-        <!-- Botão para resetar os dados e iniciar nova amostragem -->
-        <form action="/reset" method="get">
-            <button class="reset-button" type="submit">Resetar Amostragem</button>
-        </form>
+        
     </main>
-
-    <script>
-        const socket = io.connect('http://' + document.domain + ':' + location.port);  // Conecta ao servidor via Socket.IO
-
-        const muscleTensionCtx = document.getElementById('muscleTensionChart').getContext('2d');
-        const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
-
-        // Inicializa os gráficos vazios
-        const muscleTensionChart = new Chart(muscleTensionCtx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Tensão Muscular',
-                    data: [],
-                    backgroundColor: 'rgba(62, 142, 126, 0.2)',
-                    borderColor: 'rgba(62, 142, 126, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        const heartRateChart = new Chart(heartRateCtx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Frequência Cardíaca',
-                    data: [],
-                    backgroundColor: 'rgba(247, 200, 70, 0.2)',
-                    borderColor: 'rgba(247, 200, 70, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Função para adicionar novos dados ao gráfico
-        function addData(chart, label, data) {
-            chart.data.labels.push(label);
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.push(data);
-            });
-            chart.update();
-        }
-
-        // Escuta os novos dados recebidos via Socket.IO
-        socket.on('new_data', function(msg) {
-            const timeLabel = `${muscleTensionChart.data.labels.length * 1}s`;  // Exemplo de label de tempo
-            addData(muscleTensionChart, timeLabel, msg.emg);
-            addData(heartRateChart, timeLabel, msg.heart);
-        });
-    </script>
-
+    
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script> <!-- Script para os gráficos Chart.js -->
 </body>
 
