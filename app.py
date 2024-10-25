@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, jsonify
 import serial
 import keyboard
 
@@ -36,15 +36,8 @@ def capture_data():
 # Rota que exibe os dados
 @app.route("/")
 def index():
-    # Verifica se há dados antes de calcular os valores mínimos e máximos
-    if data:
-        min_val = min([d[1] for d in data])  # Acessa o valor EMG (segundo item)
-        max_val = max([d[1] for d in data])
-    else:
-        min_val, max_val = None, None  # Define valores como None se não houver dados
-
-    # Renderiza o template com os novos dados
-    return render_template("index.html", data=data, min_val=min_val, max_val=max_val)
+    # Renderiza o template com os dados capturados
+    return render_template("index.html", data=data)
 
 # Rota para resetar os dados e começar nova amostragem
 @app.route("/reset")
