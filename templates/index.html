@@ -12,7 +12,8 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Biblioteca Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script> <!-- Socket.IO -->
 </head>
 
 <body>
@@ -45,29 +46,24 @@
 
         <!-- Botão para resetar os dados e iniciar nova amostragem -->
         <form action="/reset" method="get">
-            <button type="submit">Resetar Amostragem</button>
+            <button class="reset-button" type="submit">Resetar Amostragem</button>
         </form>
     </main>
 
-    <!-- Usando url_for para referenciar o arquivo JavaScript -->
     <script>
-        // Passando os dados capturados pelo Python para o JavaScript
-        const sensorData = {
-            heartRate: JSON.parse('{{ data | tojson | safe }}').map(entry => entry[0]),  // Extrai os valores de batimentos cardíacos
-            emg: JSON.parse('{{ data | tojson | safe }}').map(entry => entry[1])  // Extrai os valores de EMG
-        };
+        const socket = io.connect('http://' + document.domain + ':' + location.port);  // Conecta ao servidor via Socket.IO
 
         const muscleTensionCtx = document.getElementById('muscleTensionChart').getContext('2d');
         const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
 
-        // Gráfico de Tensão Muscular
+        // Inicializa os gráficos vazios
         const muscleTensionChart = new Chart(muscleTensionCtx, {
             type: 'line',
             data: {
-                labels: Array(sensorData.emg.length).fill('').map((_, i) => `${i * 10}s`),
+                labels: [],
                 datasets: [{
                     label: 'Tensão Muscular',
-                    data: sensorData.emg,
+                    data: [],
                     backgroundColor: 'rgba(62, 142, 126, 0.2)',
                     borderColor: 'rgba(62, 142, 126, 1)',
                     borderWidth: 1,
@@ -83,14 +79,13 @@
             }
         });
 
-        // Gráfico de Frequência Cardíaca
         const heartRateChart = new Chart(heartRateCtx, {
             type: 'line',
             data: {
-                labels: Array(sensorData.heartRate.length).fill('').map((_, i) => `${i * 10}s`),
+                labels: [],
                 datasets: [{
                     label: 'Frequência Cardíaca',
-                    data: sensorData.heartRate,
+                    data: [],
                     backgroundColor: 'rgba(247, 200, 70, 0.2)',
                     borderColor: 'rgba(247, 200, 70, 1)',
                     borderWidth: 1,
@@ -105,7 +100,24 @@
                 }
             }
         });
+
+        // Função para adicionar novos dados ao gráfico
+        function addData(chart, label, data) {
+            chart.data.labels.push(label);
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.push(data);
+            });
+            chart.update();
+        }
+
+        // Escuta os novos dados recebidos via Socket.IO
+        socket.on('new_data', function(msg) {
+            const timeLabel = `${muscleTensionChart.data.labels.length * 1}s`;  // Exemplo de label de tempo
+            addData(muscleTensionChart, timeLabel, msg.emg);
+            addData(heartRateChart, timeLabel, msg.heart);
+        });
     </script>
+
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script> <!-- Script para os gráficos Chart.js -->
 </body>
 
